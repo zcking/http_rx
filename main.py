@@ -6,16 +6,19 @@ a script, or program.
 """
 
 import time
+import logging
 
 from rx import doctor
 
 def main(urls):
-    print(f'monitoring {urls}...')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] - %(message)s')
+    logging.info(f'monitoring {urls}...')
     doc = doctor.Doctor(urls)
 
     while True:
-        healthy, total = doc.run()
-        print(f'{healthy}/{total} passed')
+        health_report = doc.run()
+        logging.info(str(health_report))
+        health_report.log_failures()
         time.sleep(5) # sleep for 5 seconds
 
 
