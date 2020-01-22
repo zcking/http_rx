@@ -2,3 +2,7 @@
 __pycache__
 *.tar.gz
 venv
+config.json
+.vscode
+.idea
+*.iml

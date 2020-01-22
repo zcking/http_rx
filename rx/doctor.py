@@ -9,9 +9,8 @@ from . import check, report
 
 
 class Doctor(object):
-    def __init__(self, urls=[]):
-        # TODO: determine the type of check to perform dynamically
-        self.checks = [check.StatusCodeCheck(u, expected_status=200) for u in urls]
+    def __init__(self, config):
+        self.checks = [check.parse_check(conf) for conf in config['checks']]
 
     def __iadd__(self, new_check):
         assert isinstance(new_check, check.Check)

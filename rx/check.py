@@ -6,20 +6,15 @@ check against a HTTP target.
 """
 
 import requests
-from enum import Enum
-
-
-# TODO: add more types to this (e.g. body parsing etc.)
-class ConditionType(Enum):
-    STATUS_CODE = 1
+import json
 
 
 class Check(object):
-    def __init__(self, url, method='GET', headers=[], data={}):
-        self.url = url
-        self.method = method
-        self.headers = headers
-        self.data = data
+    def __init__(self, conf):
+        self.url = conf['url']
+        self.method = conf.get('method', 'GET') # defaults to HTTP GET
+        self.headers = conf.get('headers', [])
+        self.data = conf.get('data')
 
     def call(self):
         return requests.request(
@@ -31,9 +26,9 @@ class Check(object):
 
 
 class StatusCodeCheck(Check):
-    def __init__(self, url, method='GET', headers=[], data={}, expected_status=200):
-        super().__init__(url, method, headers, data)
-        self.expected_status = expected_status
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.expected_status = conf.get('expected', 200) # default to expect 200 (OK)
 
     def result(self):
         resp = self.call()
@@ -57,5 +52,23 @@ class Result(object):
             return f'check {self.name} failed : {self.fail_reason}'
         else:
             return f'check {self.resp.url} failed : {self.fail_reason}'
+
+
+CHECK_DEFS = {
+        'status': StatusCodeCheck,
+}
+
+
+def parse_check(conf):
+    ctype = conf.get('type', None)
+    if ctype is None:
+        raise Exception('you must specify a \'type\' in your check config')
+    ch = CHECK_DEFS.get(ctype, None)
+    if ch is None:
+        raise Exception(f'{ctype} is not a valid check type')
+
+    # Check is valid and we now have the actual class/type loaded
+    # initialize the check and return it to caller
+    return ch(conf)
 
 

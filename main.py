@@ -10,10 +10,9 @@ import logging
 
 from rx import doctor
 
-def main(urls):
+def main(config):
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] - %(message)s')
-    logging.info(f'monitoring {urls}...')
-    doc = doctor.Doctor(urls)
+    doc = doctor.Doctor(config)
 
     while True:
         health_report = doc.run()
@@ -23,12 +22,12 @@ def main(urls):
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(
-            description='HTTP Rx - Your HTTP Doctor',
-    )
-    parser.add_argument('url', type=str, help='URL(s) to monitor', nargs='+')
-    
-    args = parser.parse_args()
-    main(args.url)
+    import json
+    import os
+
+    # Parse config file
+    config_file_path = os.environ.get('RX_CONF', 'config.json')
+    with open(config_file_path) as config_file:
+        config = json.load(config_file)
+        main(config)
 
