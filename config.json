@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "type": "status",
+      "type": "StatusCodeCheck",
       "expected": 200,
       "url": "https://github.com/zcking"
     }

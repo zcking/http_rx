@@ -11,6 +11,10 @@ from . import check
 
 
 class Report(object):
+    """
+    Statistics for a collection of health
+    check results, including reasons for failures.
+    """
     def __init__(self, check_results):
         # check_results is a list of check.CheckResult
         healthy_results = list(filter(lambda res: res.is_healthy, check_results))
@@ -27,6 +31,10 @@ class Report(object):
         return f'{healthy}/{total} passed ({healthy_percentage}%)'
 
     def log_failures(self):
+        """
+        Log the reason for failure for each 
+        failure in the report, if any.
+        """
         for failure in self.results['failed']:
             logging.info(failure.failure_str())
 

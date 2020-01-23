@@ -10,11 +10,21 @@ import json
 
 
 class Check(object):
+    """
+    Base class for a generic health check
+    against a HTTP target. Minimal required 
+    `conf` should contain the following keys:
+        * `url`     - complete HTTP(s) URL to request
+        * `method`  - HTTP verb for request; defaults to GET
+        * `headers` - list of HTTP headers to include in request; defaults to []
+        * `data`    - request body to send in request; defaults to None
+        * `type`    - name of the check class to use; defaults to StatusCodeCheck
+    """
     def __init__(self, conf):
         self.url = conf['url']
         self.method = conf.get('method', 'GET') # defaults to HTTP GET
         self.headers = conf.get('headers', [])
-        self.data = conf.get('data')
+        self.data = conf.get('data', None)
 
     def call(self):
         return requests.request(
@@ -26,6 +36,17 @@ class Check(object):
 
 
 class StatusCodeCheck(Check):
+    """
+    Checks the status code of a HTTP response
+    to validate expected result. 
+
+    Use the `expected` config value to specify
+    the expected HTTP response status code; 
+    defaults to `200` (OK).
+
+    Note: this check is the default type of check 
+    performed if the `type` key is not specified.
+    """
     def __init__(self, conf):
         super().__init__(conf)
         self.expected_status = conf.get('expected', 200) # default to expect 200 (OK)
@@ -41,6 +62,10 @@ class StatusCodeCheck(Check):
 
 
 class Result(object):
+    """
+    Wraps the result of performing a health
+    check against a HTTP target.
+    """
     def __init__(self, name='', resp=None, is_healthy=True, fail_reason=None):
         self.resp        = resp
         self.is_healthy  = is_healthy
@@ -48,27 +73,38 @@ class Result(object):
         self.name        = name
 
     def failure_str(self):
+        """
+        Returns a formatted string containing the reason for failure.
+        """
         if self.name:
             return f'check {self.name} failed : {self.fail_reason}'
         else:
             return f'check {self.resp.url} failed : {self.fail_reason}'
 
 
-CHECK_DEFS = {
-        'status': StatusCodeCheck,
-}
-
-
 def parse_check(conf):
-    ctype = conf.get('type', None)
-    if ctype is None:
-        raise Exception('you must specify a \'type\' in your check config')
-    ch = CHECK_DEFS.get(ctype, None)
-    if ch is None:
-        raise Exception(f'{ctype} is not a valid check type')
+    default_check = f'{__name__}.{StatusCodeCheck.__name__}'
+    ctype = conf.get('type', default_check) # default check is status code check
+    
+    # Dynamically obtain the check class to use
+    import sys
+    try:
+        mod_name = __name__
+        class_name = ctype
 
-    # Check is valid and we now have the actual class/type loaded
-    # initialize the check and return it to caller
-    return ch(conf)
+        type_parts = ctype.split('.')
+        if len(type_parts) > 1:
+            mod = '.'.join(type_parts[:-1])
+            class_name = type_parts[-1]
+        
+        mod = sys.modules[mod_name]
+        ch = getattr(mod, class_name)
+
+        # Check is valid and we now have the actual class/type loaded
+        # initialize the check and return it to caller
+        return ch(conf)
+    except AttributeError:
+        # The class couldn't be found in this module
+        raise Exception(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
 
 
