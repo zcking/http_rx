@@ -5,3 +5,7 @@ venv
 .vscode
 .idea
 *.iml
+build
+dist
+external
+http_rx.egg-info

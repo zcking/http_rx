@@ -94,7 +94,7 @@ def parse_check(conf):
 
         type_parts = ctype.split('.')
         if len(type_parts) > 1:
-            mod = '.'.join(type_parts[:-1])
+            mod_name = '.'.join(type_parts[:-1])
             class_name = type_parts[-1]
         
         mod = sys.modules[mod_name]
