@@ -7,6 +7,7 @@ check against a HTTP target.
 
 import requests
 import json
+import logging
 
 
 class Check(object):
@@ -14,11 +15,13 @@ class Check(object):
     Base class for a generic health check
     against a HTTP target. Minimal required
     `conf` should contain the following keys:
+        * `name`    - readable name for the check; defaults to the URL target
         * `url`     - complete HTTP(s) URL to request
         * `method`  - HTTP verb for request; defaults to GET
         * `headers` - list of HTTP headers to include in request; defaults to []
         * `data`    - request body to send in request; defaults to None
         * `type`    - name of the check class to use; defaults to StatusCodeCheck
+        * `interval_seconds` - check should run every `interval_seconds` seconds; defaults to 15
     """
     def __init__(self, conf):
         self.url = conf['url']
@@ -26,6 +29,7 @@ class Check(object):
         self.method = conf.get('method', 'GET') # defaults to HTTP GET
         self.headers = conf.get('headers', [])
         self.data = conf.get('data', None)
+        self.interval_seconds = conf.get('intervalSeconds', 15)
 
     def call(self):
         return requests.request(
@@ -34,6 +38,16 @@ class Check(object):
             url=self.url,
             data=self.data
         )
+
+    def _run(self, results, res_lock):
+        res_lock.acquire()
+        try:
+            get_result_func = getattr(self, 'result')
+            results.append(get_result_func())
+        except Exception as e:
+            logging.error(e)
+        finally:
+            res_lock.release()
 
 
 class StatusCodeCheck(Check):

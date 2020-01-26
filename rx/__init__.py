@@ -18,10 +18,7 @@ def run():
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] - %(message)s')
     doc = doctor.Doctor(config)
+    doc.run()
 
     while True:
-        health_report = doc.run()
-        logging.info(str(health_report))
-        health_report.log_failures()
-        time.sleep(config.get('intervalSeconds', 5)) # sleep for 5 seconds by default
-
+        pass # mainloop

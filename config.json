@@ -1,16 +1,20 @@
 {
   "checks": [
     {
+      "name": "statusCheck",
       "type": "rx.check.StatusCodeCheck",
       "expected": 200,
-      "url": "https://github.com/zcking"
+      "url": "https://github.com/zcking",
+      "intervalSeconds": 2
     },
     {
+      "name": "contentCheck",
       "type": "rx.check.HeaderCheck",
       "url": "https://github.com/zcking",
       "headers": {
         "Content-Type": "text/html"
-      }
+      },
+      "intervalSeconds": 5
     }
   ]
 }
