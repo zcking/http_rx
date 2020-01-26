@@ -1,5 +1,5 @@
 """
-check.py
+Package: rx.check
 
 Defines functions for performing a health
 check against a HTTP target.
@@ -12,7 +12,7 @@ import json
 class Check(object):
     """
     Base class for a generic health check
-    against a HTTP target. Minimal required 
+    against a HTTP target. Minimal required
     `conf` should contain the following keys:
         * `url`     - complete HTTP(s) URL to request
         * `method`  - HTTP verb for request; defaults to GET
@@ -22,6 +22,7 @@ class Check(object):
     """
     def __init__(self, conf):
         self.url = conf['url']
+        self.name = conf.get('name', self.url)
         self.method = conf.get('method', 'GET') # defaults to HTTP GET
         self.headers = conf.get('headers', [])
         self.data = conf.get('data', None)
@@ -38,13 +39,13 @@ class Check(object):
 class StatusCodeCheck(Check):
     """
     Checks the status code of a HTTP response
-    to validate expected result. 
+    to validate expected result.
 
     Use the `expected` config value to specify
-    the expected HTTP response status code; 
+    the expected HTTP response status code;
     defaults to `200` (OK).
 
-    Note: this check is the default type of check 
+    Note: this check is the default type of check
     performed if the `type` key is not specified.
     """
     def __init__(self, conf):
@@ -85,7 +86,7 @@ class Result(object):
 def parse_check(conf):
     default_check = f'{__name__}.{StatusCodeCheck.__name__}'
     ctype = conf.get('type', default_check) # default check is status code check
-    
+
     # Dynamically obtain the check class to use
     import sys
     try:
@@ -96,7 +97,7 @@ def parse_check(conf):
         if len(type_parts) > 1:
             mod_name = '.'.join(type_parts[:-1])
             class_name = type_parts[-1]
-        
+
         mod = sys.modules[mod_name]
         ch = getattr(mod, class_name)
 
@@ -108,3 +109,5 @@ def parse_check(conf):
         raise Exception(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
 
 
+# Import other built-in checks for convenient resolution
+from .check_headers import *

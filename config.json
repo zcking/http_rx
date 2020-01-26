@@ -1,9 +1,16 @@
 {
   "checks": [
     {
-      "type": "StatusCodeCheck",
+      "type": "rx.check.StatusCodeCheck",
       "expected": 200,
       "url": "https://github.com/zcking"
+    },
+    {
+      "type": "rx.check.HeaderCheck",
+      "url": "https://github.com/zcking",
+      "headers": {
+        "Content-Type": "text/html"
+      }
     }
   ]
 }
