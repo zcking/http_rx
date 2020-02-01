@@ -1,4 +1,7 @@
 {
+  "report": {
+    "interval": 2.0
+  },
   "checks": [
     {
       "name": "statusCheck",

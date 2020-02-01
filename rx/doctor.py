@@ -20,6 +20,7 @@ class Doctor(object):
     """
     def __init__(self, config):
         self.checks = [check.parse_check(conf) for conf in config['checks']]
+        self.reporting_conf = config.get('report', {})
 
     def __iadd__(self, new_check):
         """
@@ -42,7 +43,9 @@ class Doctor(object):
             timer.PerpetualTimer(float(ch.interval_seconds), ch._run, args=(self.results, self.res_lock,)).start()
 
         # Create an extra timer for reporting periodically
-        timer.PerpetualTimer(2.0, self.__report).start()
+        reporting_interval = self.reporting_conf.get('interval', 5.0)
+        assert isinstance(reporting_interval, float)
+        timer.PerpetualTimer(reporting_interval, self.__report).start()
 
     def __report(self):
         self.res_lock.acquire()
