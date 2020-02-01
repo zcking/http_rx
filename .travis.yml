@@ -9,7 +9,7 @@ install:
 # Run tests
 script:
   # - pytest
-  - travis.sh
+  - bash travis.sh
 
 # Releases / Deployments
 before_deploy:
