@@ -1,23 +1,26 @@
 {
+  "logLevel": "INFO",
   "report": {
     "interval": 2.0
   },
-  "checks": [
+  "requests": [
     {
-      "name": "statusCheck",
-      "type": "rx.check.StatusCodeCheck",
-      "expected": 200,
+      "name": "GitHub Profile",
       "url": "https://github.com/zcking",
-      "intervalSeconds": 2
-    },
-    {
-      "name": "contentCheck",
-      "type": "rx.check.HeaderCheck",
-      "url": "https://github.com/zcking",
-      "headers": {
-        "Content-Type": "text/html"
-      },
-      "intervalSeconds": 5
+      "method": "GET",
+      "intervalSeconds": 0,
+      "checks": [
+        {
+          "type": "rx.check.StatusCodeCheck",
+          "expected": 200
+        },
+        {
+          "type": "rx.check.HeaderCheck",
+          "headers": {
+            "Content-Type": "text/html"
+          }
+        }
+      ]
     }
   ]
 }

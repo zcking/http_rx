@@ -31,24 +31,51 @@ This JSON config file is structured like so:
 
 ```json
 {
-  "checks": [
+  "logLevel": "INFO",
+  "report": {
+    "interval": 5.0
+  },
+  "requests": [
     {
-      "type": "rx.check.StatusCodeCheck",
-      "expected": 200,
-      "url": "https://github.com/zcking"
-    },
-    ...
+      "name": "GitHub Profile",
+      "url": "https://github.com/zcking",
+      "method": "GET",
+      "intervalSeconds": 2.0,
+      "checks": [
+        {
+          "type": "rx.check.StatusCodeCheck",
+          "expected": 201
+        },
+        {
+          "type": "rx.check.HeaderCheck",
+          "headers": {
+            "Content-Type": "text/html"
+          }
+        }
+      ]
+    }
   ]
 }
 ```
 
-The `checks` key is a list of health check configurations, 
-each of which has the following required settings:  
+The `requests` key is a list of http targets to check,
+each of which has the following settings:  
 
-* `url`  - the HTTP(s) target to request
-* `type` - fully qualified Python class; must be a derivative of the `rx.check.Check` base class. Defaults to the `rx.check.StatusCodeCheck` class
+* `url`     - the HTTP(s) target to request
+* `method`  - the HTTP verb to request with; defaults to `"GET"` 
+* `name`    - human-friendly label for the request; defaults to `{method}:{url}`
+* `data`    - request body to send; defaults to `None`
+* `headers` - request headers to send; defaults to `[]`
+* `checks`  - list of health check configurations to perform on the HTTP response
+
+For the check configurations, you must specify the following configuration(s):  
+
+* `type`   - fully qualified Python class; must be a derivative of the `rx.check.Check` base class. Defaults to the `rx.check.StatusCodeCheck` class
 
 The `type` configuration is how you may specify your own custom health check classes when extending http-rx. See the next section on doing just this.
+
+**Note:** the entire check configuration object is passed to the check class's `__init__` method for arbitrary custom configuration. See the built-in health checks in this repository for examples.
+
 
 ---
 
@@ -83,8 +110,7 @@ class CheckContentType(check.Check):
         super().__init__(conf)
         self.expected_content_type = conf.get('expected', 'text/html')
     
-    def result(self):
-        resp = self.call()
+    def result(self, resp):
         content_type = resp.headers.get('content-type', None)
         healthy = content_type == self.expected_content_type
         return check.Result(
@@ -103,11 +129,21 @@ And your config file to go along with it:
 
 ```json
 {
-  "checks": [
+  "report": {
+    "interval": 2.0
+  },
+  "requests": [
     {
-      "type": "__main__.CheckContentType",
-      "expected": "text/html",
-      "url": "https://github.com/zcking"
+      "name": "GitHub Profile",
+      "url": "https://github.com/zcking",
+      "method": "GET",
+      "intervalSeconds": 0,
+      "checks": [
+        {
+          "type": "__main__.CheckContentType",
+          "expected": "application/json"
+        }
+      ]
     }
   ]
 }

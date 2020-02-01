@@ -5,7 +5,7 @@ Defines the Doctor class for managing
 a collection of HTTP health checks.
 """
 
-from . import check, report
+from . import check, report, request
 from rx import timer
 
 import threading
@@ -16,31 +16,36 @@ class Doctor(object):
     """
     Health check manager for keeping track
     of and reporting on a collection of
-    health checks.
+    requests and health checks for them.
     """
     def __init__(self, config):
-        self.checks = [check.parse_check(conf) for conf in config['checks']]
+        self.requests = [request.parse_request(conf) for conf in config['requests']]
         self.reporting_conf = config.get('report', {})
 
-    def __iadd__(self, new_check):
+    def __iadd__(self, new_request):
         """
-        Add a new check to the doctor's
-        healthy checklist.
+        Add a new request to the doctor's
+        health checklist.
         """
-        assert isinstance(new_check, check.Check)
-        self.checks.append(new_check)
+        assert isinstance(new_request, request.Request)
+        self.requests.append(new_request)
 
     def run(self):
         """
-        Mainloop for getting the result of each of the
-        doctor's health checks and return a report of
+        Mainloop for getting the results of each of the
+        doctor's request targets and return a report of
         the complete results.
         """
         self.results = [] # to store check.CheckResult
         self.res_lock = threading.Lock()
 
-        for ch in self.checks:
-            timer.PerpetualTimer(float(ch.interval_seconds), ch._run, args=(self.results, self.res_lock,)).start()
+        for req in self.requests:
+            interval_seconds = float(req.interval)
+            if interval_seconds <= 0:
+                # Non-positive interval --> one-shot; use normal threading timer
+                threading.Timer(float(req.interval), req._run, args=(self.results, self.res_lock,)).start()
+            else:
+                timer.PerpetualTimer(float(req.interval), req._run, args=(self.results, self.res_lock,)).start()
 
         # Create an extra timer for reporting periodically
         reporting_interval = self.reporting_conf.get('interval', 5.0)

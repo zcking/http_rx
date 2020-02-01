@@ -16,9 +16,6 @@ def run():
     with open(config_file_path) as config_file:
         config = json.load(config_file)
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] - %(message)s')
+    logging.basicConfig(level=logging.getLevelName(config.get('logLevel', 'INFO')), format='%(asctime)s [%(levelname)s] - %(message)s')
     doc = doctor.Doctor(config)
-    doc.run()
-
-    while True:
-        pass # mainloop
+    doc.run() # mainloop

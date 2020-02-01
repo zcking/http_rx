@@ -16,9 +16,7 @@ class HeaderCheck(Check):
         assert isinstance(headersConf, dict)
         self.conditions = self.__class__.parseConditions(headersConf)
 
-    def result(self):
-        resp = self.call()
-
+    def result(self, resp):
         # Validate each header condition
         for header, expr in self.conditions.items():
             header_val = resp.headers.get(header, None)

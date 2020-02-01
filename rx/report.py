@@ -1,7 +1,7 @@
 """
 report.py
 
-Defines reporting functionality for 
+Defines reporting functionality for
 HTTP RX checks/healthiness.
 """
 
@@ -32,11 +32,11 @@ class Report(object):
 
     def log_failures(self):
         """
-        Log the reason for failure for each 
+        Log the reason for failure for each
         failure in the report, if any.
         """
         for failure in self.results['failed']:
-            logging.info(failure.failure_str())
+            logging.error(failure.failure_str())
 
 
 

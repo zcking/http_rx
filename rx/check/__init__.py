@@ -5,49 +5,21 @@ Defines functions for performing a health
 check against a HTTP target.
 """
 
-import requests
-import json
-import logging
-
 
 class Check(object):
     """
     Base class for a generic health check
     against a HTTP target. Minimal required
     `conf` should contain the following keys:
-        * `name`    - readable name for the check; defaults to the URL target
-        * `url`     - complete HTTP(s) URL to request
-        * `method`  - HTTP verb for request; defaults to GET
-        * `headers` - list of HTTP headers to include in request; defaults to []
-        * `data`    - request body to send in request; defaults to None
+        * `name`    - readable name for the check; defaults to the `type`
         * `type`    - name of the check class to use; defaults to StatusCodeCheck
-        * `interval_seconds` - check should run every `interval_seconds` seconds; defaults to 15
     """
     def __init__(self, conf):
-        self.url = conf['url']
-        self.name = conf.get('name', self.url)
-        self.method = conf.get('method', 'GET') # defaults to HTTP GET
-        self.headers = conf.get('headers', [])
-        self.data = conf.get('data', None)
-        self.interval_seconds = conf.get('intervalSeconds', 15)
+        self.__type_str = conf['type']
+        self.name = conf.get('name', self.__type_str)
 
-    def call(self):
-        return requests.request(
-            self.method,
-            headers=self.headers,
-            url=self.url,
-            data=self.data
-        )
-
-    def _run(self, results, res_lock):
-        res_lock.acquire()
-        try:
-            get_result_func = getattr(self, 'result')
-            results.append(get_result_func())
-        except Exception as e:
-            logging.error(e)
-        finally:
-            res_lock.release()
+    def result(self, response):
+        raise NotImplementedError("you must implement the result(self, response) method")
 
 
 class StatusCodeCheck(Check):
@@ -66,9 +38,7 @@ class StatusCodeCheck(Check):
         super().__init__(conf)
         self.expected_status = conf.get('expected', 200) # default to expect 200 (OK)
 
-    def result(self):
-        resp = self.call()
-
+    def result(self, resp):
         if resp.status_code != self.expected_status:
             fail_msg = f'expected status code {self.expected_status} but got {resp.status_code}'
             return Result(resp=resp, is_healthy=False, fail_reason=fail_msg)
