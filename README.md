@@ -1,8 +1,6 @@
 # HTTP Rx - Your HTTP Doctor
 
-**HTTP Rx** is a simple site/http monitor for your websites and HTTP endpoints. The tool monitors a given list of endpoint configurations and sends alerts if the expected health check does not pass.
-
-Additional reporting is also provided and be configured per health check.
+**HTTP Rx** is a simple site/http monitor for your websites and HTTP endpoints. The tool monitors a given list of endpoint configurations and logs errors if the expected health check does not pass.
 
 ---
 
@@ -24,8 +22,7 @@ python setup.py install
 
 ## Configuration
 
-HTTP Rx is very dynamic and configurable. The health checker 
-looks for a `config.json` file in your current directory, or if you specify the `RX_CONFIG` environment variable you can change the path to your config file. 
+HTTP Rx is very dynamic and configurable, inspired by the Java Spring framework, the health checker looks for a `config.json` file in your current directory, or if you specify the `RX_CONFIG` environment variable you can change the path to your config file. 
 
 This JSON config file is structured like so:  
 
