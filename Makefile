@@ -1,4 +1,4 @@
-.PHONY: dist push-pypi clean
+.PHONY: dist push-pypi clean set-version
 
 HOST_PYTHON=/usr/bin/python3
 
@@ -13,4 +13,7 @@ dist:
 
 push-pypi:
 	${HOST_PYTHON} -m twine upload dist/*
+
+set-version:
+	sed -i -E "s/version='.*',/version='${VERSION}',/" setup.py
 

@@ -8,7 +8,7 @@ with open('requirements.txt', 'r') as rf:
 
 setuptools.setup(
     name='http_rx',
-    version='0.4.2',
+    version='0.4.3',
     author='Zachary King',
     author_email='kingzach77@gmail.com',
     description='Extensible HTTP health checker for Python',
