@@ -1,0 +1,8 @@
+# .coveragerc to control coverage.py
+
+[run]
+branch = True
+source = rx
+omit = 
+    */test_*.py
+command_line = -m pytest --color=yes --verbose

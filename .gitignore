@@ -9,3 +9,5 @@ build
 dist
 external
 http_rx.egg-info
+.coverage
+htmlcov
