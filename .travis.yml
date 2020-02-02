@@ -1,0 +1,23 @@
+language: python
+python:
+- '3.5'
+
+# Install dependencies
+install:
+  - pip install -r requirements.txt
+
+# Run tests
+script:
+  # - pytest
+  - bash travis.sh
+
+# Releases / Deployments
+before_deploy:
+- make clean dist
+
+deploy:
+  provider: pypi
+  on:
+    branch: master
+  password:
+    secure: "ufCD7U7Kgz158HjieHI54qBAx54JLxXcKt7DLuHb/YfPEo4Z70JqoXLt7PmR7dWIfmY36Lki4zWrrso1VxZn7fRiOlIBzKSOS6HcrVYwkAJPxXgqZlV0DFDwaKr9LWZphM+cLc5ZT15XSmPaOyymGelhUIEgTesHsBl6ze0h8bm3a9AShzm+PtK94bpNFriBczMeGdk78Q8dxSVx+zfJOfDvlxPzzolFa+rhliFXXPwzFvlLBKSzF0rCNuxm6FrQ5wixovL9TTF2zmf3aGD2GqOxHYsVX4JXSIIUh/X9jkiIdZavsddNJ7efgsb9hiDQYgUMOOEC4IK1LV+b0ACnWpjMgZrvgnJCq1Nu0DG60mK2185LdFGjmqP5fljBSVGTdsAB9/i/CK6xBSynVr7Ta8l2Y76zt4fFIy3fRb4HC32ddvF8Ve1G9pQeS1I5Ozug0/XyVtRa5xXgq4LB9rHCN9fnIbQpr+fMSNeNbpV0q+r8sn2ljMiavuNds7gD5iQCPcaYYIhzwPQETvi+sm9fi5IRKkFCkd1aqHjVKuKgl6+YdJSjttu0MuOwD0D5WrDXrAGBSpdwb6FeciOuWcFY8Uu47GrXCRAe5FerEScAk/W+e1ddB8/hfa+XTC0sbVqa9ZxbrqFB4nspGAWZn9qjcOsnl8MRGCRErOJ5/UYCqe4="
