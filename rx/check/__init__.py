@@ -15,8 +15,7 @@ class Check(object):
         * `type`    - name of the check class to use; defaults to StatusCodeCheck
     """
     def __init__(self, conf):
-        self.__type_str = conf['type']
-        self.name = conf.get('name', self.__type_str)
+        self.name = conf.get('name', conf.get('type', self.__repr__()))
 
     def result(self, response):
         raise NotImplementedError("you must implement the result(self, response) method")
@@ -57,19 +56,20 @@ class Result(object):
         self.fail_reason = fail_reason
         self.name        = name
 
-    def failure_str(self):
+    def __str__(self):
         """
         Returns a formatted string containing the reason for failure.
         """
-        if self.name:
-            return f'check {self.name} failed : {self.fail_reason}'
+        label = self.name if self.name else self.resp.url
+
+        if self.is_healthy:
+            return 'check {label} passed'.format(label=label)
         else:
-            return f'check {self.resp.url} failed : {self.fail_reason}'
+            return 'check {label} failed : {reason}'.format(label=label, reason=self.fail_reason)
 
 
 def parse_check(conf):
-    default_check = f'{__name__}.{StatusCodeCheck.__name__}'
-    ctype = conf.get('type', default_check) # default check is status code check
+    ctype = conf['type']
 
     # Dynamically obtain the check class to use
     import sys
@@ -88,9 +88,9 @@ def parse_check(conf):
         # Check is valid and we now have the actual class/type loaded
         # initialize the check and return it to caller
         return ch(conf)
-    except AttributeError:
+    except (AttributeError, KeyError):
         # The class couldn't be found in this module
-        raise Exception(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
+        raise KeyError(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
 
 
 # Import other built-in checks for convenient resolution

@@ -1,9 +1,9 @@
-.PHONY: dist push-pypi clean set-version
+.PHONY: dist push-pypi clean set-version test
 
 HOST_PYTHON=/usr/bin/python3
 
 clean:
-	rm -rf dist
+	rm -rf dist && coverage erase
 
 run:
 	python main.py
@@ -16,4 +16,8 @@ push-pypi:
 
 set-version:
 	sed -i -E "s/version='.*',/version='${VERSION}',/" setup.py
+
+test:
+	coverage run
+	coverage report -m && coverage html
 
