@@ -5,7 +5,8 @@ Defines the Doctor class for managing
 a collection of HTTP health checks.
 """
 
-from . import check, report, request
+from . import check, report
+from .request import Request
 from rx import timer
 
 import threading
@@ -19,7 +20,7 @@ class Doctor(object):
     requests and health checks for them.
     """
     def __init__(self, config):
-        self.requests = [request.parse_request(conf) for conf in config['requests']]
+        self.requests = [Request.parse(conf) for conf in config['requests']]
         self.reporting_conf = config.get('report', {})
 
     def __iadd__(self, new_request):
@@ -27,7 +28,7 @@ class Doctor(object):
         Add a new request to the doctor's
         health checklist.
         """
-        assert isinstance(new_request, request.Request)
+        assert isinstance(new_request, Request)
         self.requests.append(new_request)
 
     def run(self):

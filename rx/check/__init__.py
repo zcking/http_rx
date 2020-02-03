@@ -20,6 +20,31 @@ class Check(object):
     def result(self, response):
         raise NotImplementedError("you must implement the result(self, response) method")
 
+    @staticmethod
+    def parse(conf):
+        ctype = conf['type']
+
+        # Dynamically obtain the check class to use
+        import sys
+        try:
+            mod_name = __name__
+            class_name = ctype
+
+            type_parts = ctype.split('.')
+            if len(type_parts) > 1:
+                mod_name = '.'.join(type_parts[:-1])
+                class_name = type_parts[-1]
+
+            mod = sys.modules[mod_name]
+            ch = getattr(mod, class_name)
+
+            # Check is valid and we now have the actual class/type loaded
+            # initialize the check and return it to caller
+            return ch(conf)
+        except (AttributeError, KeyError):
+            # The class couldn't be found in this module
+            raise KeyError(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
+
 
 class StatusCodeCheck(Check):
     """
@@ -66,31 +91,6 @@ class Result(object):
             return 'check {label} passed'.format(label=label)
         else:
             return 'check {label} failed : {reason}'.format(label=label, reason=self.fail_reason)
-
-
-def parse_check(conf):
-    ctype = conf['type']
-
-    # Dynamically obtain the check class to use
-    import sys
-    try:
-        mod_name = __name__
-        class_name = ctype
-
-        type_parts = ctype.split('.')
-        if len(type_parts) > 1:
-            mod_name = '.'.join(type_parts[:-1])
-            class_name = type_parts[-1]
-
-        mod = sys.modules[mod_name]
-        ch = getattr(mod, class_name)
-
-        # Check is valid and we now have the actual class/type loaded
-        # initialize the check and return it to caller
-        return ch(conf)
-    except (AttributeError, KeyError):
-        # The class couldn't be found in this module
-        raise KeyError(f'{ctype} is not a valid check type; make sure the class is loaded in your sys.modules')
 
 
 # Import other built-in checks for convenient resolution

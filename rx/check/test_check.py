@@ -2,7 +2,7 @@ import pytest
 
 import requests
 
-from . import Check, StatusCodeCheck, parse_check, Result
+from . import Check, StatusCodeCheck, Result
 
 class TestCheck:
     def test_check_parser(self):
@@ -11,7 +11,7 @@ class TestCheck:
             'name': 'TestCheck',
             'expected': 201,
         }
-        chk = parse_check(conf)
+        chk = Check.parse(conf)
         assert chk.name == 'TestCheck'
         assert isinstance(chk, Check)
         assert isinstance(chk, StatusCodeCheck)
@@ -19,7 +19,7 @@ class TestCheck:
 
     def test_check_parser_requires_type(self):
         with pytest.raises(KeyError) as err:
-            parse_check({})
+            Check.parse({})
         assert 'type' in str(err)
 
     def test_base_check_class_not_usable(self):
@@ -32,14 +32,14 @@ class TestCheck:
         assert chk.name == 'rx.check.Check'
 
     def test_check_parsing_infers_builtin(self):
-        chk = parse_check({'type': 'StatusCodeCheck'})
+        chk = Check.parse({'type': 'StatusCodeCheck'})
         assert isinstance(chk, Check)
         assert isinstance(chk, StatusCodeCheck)
         assert chk.expected_status == 200
 
     def test_check_parsing_throws_error_on_bad_type(self):
         with pytest.raises(KeyError) as err:
-            parse_check({'type': 'some.NonExistentCheck'})
+            Check.parse({'type': 'some.NonExistentCheck'})
         assert 'some.NonExistentCheck is not a valid check type' in str(err)
 
 
