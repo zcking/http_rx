@@ -28,7 +28,7 @@ class Report(object):
         healthy = len(self.results['healthy'])
         total   = len(self.results['failed']) + healthy
         healthy_percentage = float(healthy) / float(total) * 100.0
-        return f'{healthy}/{total} passed ({healthy_percentage}%)'
+        return '%d/%d passed (%2.02f%%)' % (healthy, total, healthy_percentage,)
 
     def log_failures(self):
         """
