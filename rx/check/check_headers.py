@@ -14,7 +14,7 @@ class HeaderCheck(Check):
         super().__init__(conf)
         headersConf = conf.get('headers', {})
         assert isinstance(headersConf, dict)
-        self.conditions = self.__class__.parseConditions(headersConf)
+        self.conditions = self.__class__.parse_conditions(headersConf)
 
     def result(self, resp):
         # Validate each header condition
@@ -51,7 +51,7 @@ class HeaderCheck(Check):
 
 
     @staticmethod
-    def parseConditions(headersConf):
+    def parse_conditions(headersConf):
         """
         Parses a dictionary of header conditions.
         The keys of the dictionary are the header names,
